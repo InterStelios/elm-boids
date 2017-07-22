@@ -1,7 +1,7 @@
-module Environment exposing (addAxis)
+module Utils exposing (addAxis)
 
-import Collage exposing (..)
-import Color exposing (..)
+import Collage exposing (Form, dotted, path, traced)
+import Color exposing (black)
 
 
 addAxis : Int -> Int -> List Form -> List Form

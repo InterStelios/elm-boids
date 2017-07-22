@@ -10918,49 +10918,67 @@ var _evancz$elm_graphics$Collage$ngon = F2(
 				f,
 				A2(_elm_lang$core$List$range, 0, n - 1)));
 	});
-var _user$project$Boid$update = function (_p0) {
+var _user$project$Boid$yDirection = F3(
+	function (y, angle, step) {
+		return step * _elm_lang$core$Basics$sin(
+			_elm_lang$core$Basics$degrees(angle));
+	});
+var _user$project$Boid$xDirection = F3(
+	function (x, angle, step) {
+		return step * _elm_lang$core$Basics$cos(
+			_elm_lang$core$Basics$degrees(angle));
+	});
+var _user$project$Boid$boid = function (_p0) {
 	var _p1 = _p0;
-	var speed = 10;
-	var angle = 90;
-	return {
-		ctor: '_Tuple2',
-		_0: _elm_lang$core$Basics$cos(
-			_elm_lang$core$Basics$radians(speed * angle)) + _p1._0,
-		_1: _elm_lang$core$Basics$sin(
-			_elm_lang$core$Basics$radians(speed * angle)) + _p1._1
-	};
-};
-var _user$project$Boid$boid = function (_p2) {
-	var _p3 = _p2;
-	var _p5 = _p3._1;
-	var _p4 = _p3._0;
 	return A2(
-		_evancz$elm_graphics$Collage$filled,
-		_elm_lang$core$Color$black,
-		_evancz$elm_graphics$Collage$polygon(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: _p4, _1: _p5},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: _p4 + 20, _1: _p5 - 25},
-					_1: {
+		_evancz$elm_graphics$Collage$move,
+		_p1.position,
+		A2(
+			_evancz$elm_graphics$Collage$rotate,
+			_elm_lang$core$Basics$degrees(_p1.angle),
+			A2(
+				_evancz$elm_graphics$Collage$filled,
+				_elm_lang$core$Color$black,
+				_evancz$elm_graphics$Collage$polygon(
+					{
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: _p4, _1: _p5 + 50},
+						_0: {ctor: '_Tuple2', _0: 0, _1: 0},
 						_1: {
 							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: _p4 - 20, _1: _p5 - 25},
-							_1: {ctor: '[]'}
+							_0: {ctor: '_Tuple2', _0: 0 - 4, _1: 0 + 5},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 0 + 10, _1: 0},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 0 - 4, _1: 0 - 5},
+									_1: {ctor: '[]'}
+								}
+							}
 						}
-					}
-				}
-			}));
+					}))));
 };
 var _user$project$Boid$Boid = F2(
 	function (a, b) {
 		return {position: a, angle: b};
 	});
-var _user$project$Environment$yAxis = function (height) {
+var _user$project$Boid$update = function (_p2) {
+	var _p3 = _p2;
+	var _p5 = _p3.angle;
+	var speed = 1;
+	var _p4 = _p3.position;
+	var x = _p4._0;
+	var y = _p4._1;
+	return A2(
+		_user$project$Boid$Boid,
+		{
+			ctor: '_Tuple2',
+			_0: A3(_user$project$Boid$xDirection, x, _p5, speed) + x,
+			_1: A3(_user$project$Boid$yDirection, y, _p5, speed) + y
+		},
+		_p5);
+};
+var _user$project$Utils$yAxis = function (height) {
 	return A2(
 		_evancz$elm_graphics$Collage$traced,
 		_evancz$elm_graphics$Collage$dotted(_elm_lang$core$Color$black),
@@ -10983,7 +11001,7 @@ var _user$project$Environment$yAxis = function (height) {
 				}
 			}));
 };
-var _user$project$Environment$xAxis = function (width) {
+var _user$project$Utils$xAxis = function (width) {
 	return A2(
 		_evancz$elm_graphics$Collage$traced,
 		_evancz$elm_graphics$Collage$dotted(_elm_lang$core$Color$black),
@@ -11006,75 +11024,101 @@ var _user$project$Environment$xAxis = function (width) {
 				}
 			}));
 };
-var _user$project$Environment$addAxis = F3(
+var _user$project$Utils$addAxis = F3(
 	function (width, height, eles) {
 		return A2(
 			_elm_lang$core$Basics_ops['++'],
 			eles,
 			{
 				ctor: '::',
-				_0: _user$project$Environment$xAxis(width),
+				_0: _user$project$Utils$xAxis(width),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Environment$yAxis(height),
+					_0: _user$project$Utils$yAxis(height),
 					_1: {ctor: '[]'}
 				}
 			});
 	});
 var _user$project$Main$view = function (_p0) {
 	var _p1 = _p0;
-	var _p2 = _p1.boid;
+	var _p3 = _p1.boid;
+	var _p2 = _p1.world;
+	var width = _p2._0;
+	var height = _p2._1;
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html$text(
-				_elm_lang$core$Basics$toString(_p2)),
+				_elm_lang$core$Basics$toString(_p3)),
 			_1: {
 				ctor: '::',
 				_0: _evancz$elm_graphics$Element$toHtml(
 					A3(
 						_evancz$elm_graphics$Collage$collage,
-						750,
-						500,
+						_elm_lang$core$Basics$round(width),
+						_elm_lang$core$Basics$round(height),
 						A3(
-							_user$project$Environment$addAxis,
-							750,
-							500,
+							_user$project$Utils$addAxis,
+							_elm_lang$core$Basics$round(width),
+							_elm_lang$core$Basics$round(height),
 							{
 								ctor: '::',
-								_0: _user$project$Boid$boid(_p2.position),
+								_0: _user$project$Boid$boid(_p3),
 								_1: {ctor: '[]'}
 							}))),
 				_1: {ctor: '[]'}
 			}
 		});
 };
+var _user$project$Main$wrapBoidPosition = F2(
+	function (world, nextBoid) {
+		var _p4 = world;
+		var worldX = _p4._0;
+		var worldY = _p4._1;
+		var _p5 = nextBoid.position;
+		var nextX = _p5._0;
+		var nextY = _p5._1;
+		return (_elm_lang$core$Native_Utils.cmp(nextX * 2, worldX) > 0) ? _elm_lang$core$Native_Utils.update(
+			nextBoid,
+			{
+				position: {ctor: '_Tuple2', _0: worldX / -2, _1: nextY}
+			}) : ((_elm_lang$core$Native_Utils.cmp(nextX * 2, 0 - worldX) < 0) ? _elm_lang$core$Native_Utils.update(
+			nextBoid,
+			{
+				position: {ctor: '_Tuple2', _0: worldX / 2, _1: nextY}
+			}) : ((_elm_lang$core$Native_Utils.cmp(nextY * 2, worldY) > 0) ? _elm_lang$core$Native_Utils.update(
+			nextBoid,
+			{
+				position: {ctor: '_Tuple2', _0: nextX, _1: worldY / -2}
+			}) : ((_elm_lang$core$Native_Utils.cmp(nextY * 2, 0 - worldY) < 0) ? _elm_lang$core$Native_Utils.update(
+			nextBoid,
+			{
+				position: {ctor: '_Tuple2', _0: 0, _1: worldY / 2}
+			}) : nextBoid)));
+	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p3 = msg;
+		var _p6 = msg;
+		var nextBoidAttrs = _user$project$Boid$update(model.boid);
+		var nextBoid = A2(_user$project$Main$wrapBoidPosition, model.world, nextBoidAttrs);
 		return {
 			ctor: '_Tuple2',
 			_0: _elm_lang$core$Native_Utils.update(
 				model,
-				{
-					boid: {
-						angle: model.boid.angle,
-						position: _user$project$Boid$update(model.boid.position)
-					}
-				}),
+				{boid: nextBoid}),
 			_1: _elm_lang$core$Platform_Cmd$none
 		};
 	});
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
 	_0: {
-		boid: {
-			position: {ctor: '_Tuple2', _0: 0, _1: 0},
-			angle: 90
-		},
-		world: {ctor: '_Tuple2', _0: 750, _1: 500}
+		boid: A2(
+			_user$project$Boid$Boid,
+			{ctor: '_Tuple2', _0: 50, _1: 50},
+			180),
+		world: {ctor: '_Tuple2', _0: 500, _1: 500}
 	},
 	_1: _elm_lang$core$Platform_Cmd$none
 };
@@ -11085,8 +11129,8 @@ var _user$project$Main$Model = F2(
 var _user$project$Main$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
-var _user$project$Main$subscriptions = function (_p4) {
-	return A2(_elm_lang$core$Time$every, _elm_lang$core$Time$second, _user$project$Main$Tick);
+var _user$project$Main$subscriptions = function (_p7) {
+	return A2(_elm_lang$core$Time$every, 16, _user$project$Main$Tick);
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
