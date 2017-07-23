@@ -10978,6 +10978,16 @@ var _user$project$Boid$update = function (_p2) {
 		},
 		_p5);
 };
+var _user$project$Utils$wrapPosition = F2(
+	function (position, worldCoordinates) {
+		var _p0 = worldCoordinates;
+		var worldX = _p0._0;
+		var worldY = _p0._1;
+		var _p1 = position;
+		var nextX = _p1._0;
+		var nextY = _p1._1;
+		return (_elm_lang$core$Native_Utils.cmp(nextX * 2, worldX) > 0) ? {ctor: '_Tuple2', _0: worldX / -2, _1: nextY} : ((_elm_lang$core$Native_Utils.cmp(nextX * 2, 0 - worldX) < 0) ? {ctor: '_Tuple2', _0: worldX / 2, _1: nextY} : ((_elm_lang$core$Native_Utils.cmp(nextY * 2, worldY) > 0) ? {ctor: '_Tuple2', _0: nextX, _1: worldY / -2} : ((_elm_lang$core$Native_Utils.cmp(nextY * 2, 0 - worldY) < 0) ? {ctor: '_Tuple2', _0: 0, _1: worldY / 2} : position)));
+	});
 var _user$project$Utils$yAxis = function (height) {
 	return A2(
 		_evancz$elm_graphics$Collage$traced,
@@ -11073,36 +11083,18 @@ var _user$project$Main$view = function (_p0) {
 		});
 };
 var _user$project$Main$wrapBoidPosition = F2(
-	function (world, nextBoid) {
-		var _p4 = world;
-		var worldX = _p4._0;
-		var worldY = _p4._1;
-		var _p5 = nextBoid.position;
-		var nextX = _p5._0;
-		var nextY = _p5._1;
-		return (_elm_lang$core$Native_Utils.cmp(nextX * 2, worldX) > 0) ? _elm_lang$core$Native_Utils.update(
-			nextBoid,
+	function (boid, worldCoordinates) {
+		return _elm_lang$core$Native_Utils.update(
+			boid,
 			{
-				position: {ctor: '_Tuple2', _0: worldX / -2, _1: nextY}
-			}) : ((_elm_lang$core$Native_Utils.cmp(nextX * 2, 0 - worldX) < 0) ? _elm_lang$core$Native_Utils.update(
-			nextBoid,
-			{
-				position: {ctor: '_Tuple2', _0: worldX / 2, _1: nextY}
-			}) : ((_elm_lang$core$Native_Utils.cmp(nextY * 2, worldY) > 0) ? _elm_lang$core$Native_Utils.update(
-			nextBoid,
-			{
-				position: {ctor: '_Tuple2', _0: nextX, _1: worldY / -2}
-			}) : ((_elm_lang$core$Native_Utils.cmp(nextY * 2, 0 - worldY) < 0) ? _elm_lang$core$Native_Utils.update(
-			nextBoid,
-			{
-				position: {ctor: '_Tuple2', _0: 0, _1: worldY / 2}
-			}) : nextBoid)));
+				position: A2(_user$project$Utils$wrapPosition, boid.position, worldCoordinates)
+			});
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p6 = msg;
-		var nextBoidAttrs = _user$project$Boid$update(model.boid);
-		var nextBoid = A2(_user$project$Main$wrapBoidPosition, model.world, nextBoidAttrs);
+		var _p4 = msg;
+		var nextBoidWithoutRestrictions = _user$project$Boid$update(model.boid);
+		var nextBoid = A2(_user$project$Main$wrapBoidPosition, nextBoidWithoutRestrictions, model.world);
 		return {
 			ctor: '_Tuple2',
 			_0: _elm_lang$core$Native_Utils.update(
@@ -11129,7 +11121,7 @@ var _user$project$Main$Model = F2(
 var _user$project$Main$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
-var _user$project$Main$subscriptions = function (_p7) {
+var _user$project$Main$subscriptions = function (_p5) {
 	return A2(_elm_lang$core$Time$every, 16, _user$project$Main$Tick);
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(

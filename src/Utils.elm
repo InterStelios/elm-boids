@@ -1,7 +1,8 @@
-module Utils exposing (addAxis)
+module Utils exposing (addAxis, wrapPosition)
 
 import Collage exposing (Form, dotted, path, traced)
 import Color exposing (black)
+import Types exposing (Point)
 
 
 addAxis : Int -> Int -> List Form -> List Form
@@ -25,3 +26,24 @@ yAxis height =
         , ( 0, toFloat height / 2 )
         ]
         |> traced (dotted black)
+
+
+wrapPosition : Point -> Point -> Point
+wrapPosition position worldCoordinates =
+    let
+        ( nextX, nextY ) =
+            position
+
+        ( worldX, worldY ) =
+            worldCoordinates
+    in
+        if (nextX * 2 > worldX) then
+            ( (worldX / -2), nextY )
+        else if (nextX * 2 < -worldX) then
+            ( (worldX / 2), nextY )
+        else if (nextY * 2 > worldY) then
+            ( nextX, (worldY / -2) )
+        else if (nextY * 2 < -worldY) then
+            ( 0, worldY / 2 )
+        else
+            position

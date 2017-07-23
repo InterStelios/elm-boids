@@ -6,7 +6,7 @@ import Element exposing (toHtml)
 import Html exposing (Html, div, text)
 import Time exposing (Time, every)
 import Types exposing (Point)
-import Utils exposing (addAxis)
+import Utils exposing (addAxis, wrapPosition)
 
 
 main : Program Never Model Msg
@@ -38,37 +38,11 @@ init =
     )
 
 
-wrapBoidPosition : ( Float, Float ) -> Boid -> Boid
-wrapBoidPosition world nextBoid =
-    let
-        ( nextX, nextY ) =
-            nextBoid.position
-
-        ( worldX, worldY ) =
-            world
-    in
-        if (nextX * 2 > worldX) then
-            ({ nextBoid
-                | position = ( (worldX / -2), nextY )
-             }
-            )
-        else if (nextX * 2 < -worldX) then
-            ({ nextBoid
-                | position = ( (worldX / 2), nextY )
-             }
-            )
-        else if (nextY * 2 > worldY) then
-            ({ nextBoid
-                | position = ( nextX, (worldY / -2) )
-             }
-            )
-        else if (nextY * 2 < -worldY) then
-            ({ nextBoid
-                | position = ( 0, worldY / 2 )
-             }
-            )
-        else
-            nextBoid
+wrapBoidPosition : Boid -> Point -> Boid
+wrapBoidPosition boid worldCoordinates =
+    { boid
+        | position = wrapPosition boid.position worldCoordinates
+    }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -76,11 +50,13 @@ update msg model =
     case msg of
         Tick _ ->
             let
-                nextBoidAttrs =
+                nextBoidWithoutRestrictions =
                     Boid.update model.boid
 
                 nextBoid =
-                    wrapBoidPosition model.world nextBoidAttrs
+                    wrapBoidPosition
+                        nextBoidWithoutRestrictions
+                        model.world
             in
                 ( { model
                     | boid = nextBoid
