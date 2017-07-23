@@ -2,7 +2,7 @@ module Boid exposing (Boid, boid, update)
 
 import Basics exposing (degrees)
 import Collage exposing (Form, filled, move, polygon, rotate)
-import Color exposing (black)
+import Color exposing (white)
 import Types exposing (Point)
 
 
@@ -20,7 +20,7 @@ boid { position, angle } =
         , ( 0 + 10, 0 )
         , ( 0 - 4, 0 - 5 )
         ]
-        |> filled black
+        |> filled white
         |> rotate (degrees angle)
         |> move position
 

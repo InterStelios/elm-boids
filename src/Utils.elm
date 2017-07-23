@@ -1,7 +1,7 @@
 module Utils exposing (addAxis, wrapPosition)
 
 import Collage exposing (Form, dotted, path, traced)
-import Color exposing (black)
+import Color exposing (white)
 import Types exposing (Point)
 
 
@@ -16,7 +16,7 @@ xAxis width =
         [ ( toFloat -width / 2, 0 )
         , ( toFloat width / 2, 0 )
         ]
-        |> traced (dotted black)
+        |> traced (dotted white)
 
 
 yAxis : Int -> Form
@@ -25,7 +25,7 @@ yAxis height =
         [ ( 0, toFloat -height / 2 )
         , ( 0, toFloat height / 2 )
         ]
-        |> traced (dotted black)
+        |> traced (dotted white)
 
 
 wrapPosition : Point -> Point -> Point

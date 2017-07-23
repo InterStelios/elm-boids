@@ -24,30 +24,31 @@ main =
 
 type alias Model =
     { boid : { position : Point, angle : Float }
-    , world : Point
-    , env : { window : Size }
+    , world : ( Int, Int )
     }
 
 
 type Msg
     = Tick Time
-    | UpdateSize Size
+    | UpdateWorld Size
 
 
 init : ( Model, Cmd Msg )
 init =
     ( { boid = Boid ( 50, 50 ) 180
-      , world = (0, 0)
-      , env = { window = Size 0 0 }
+      , world = ( 0, 0 )
       }
-    , Task.perform UpdateSize size
+    , Task.perform UpdateWorld size
     )
 
 
-wrapBoidPosition : Boid -> Point -> Boid
-wrapBoidPosition boid worldCoordinates =
+wrapBoidPosition : Boid -> ( Int, Int ) -> Boid
+wrapBoidPosition boid ( width, height ) =
     { boid
-        | position = wrapPosition boid.position worldCoordinates
+        | position =
+            wrapPosition
+                boid.position
+                ( toFloat width, toFloat height )
     }
 
 
@@ -70,19 +71,12 @@ update msg model =
                 , Cmd.none
                 )
 
-        UpdateSize size ->
-            let
-                { env } =
-                    model
-
-                newEnv =
-                    { env | window = size }
-            in
-                ( { model
-                    | env = newEnv
-                  }
-                , Cmd.none
-                )
+        UpdateWorld size ->
+            ( { model
+                | world = ( size.width, size.height )
+              }
+            , Cmd.none
+            )
 
 
 subscriptions : Model -> Sub Msg
@@ -93,24 +87,25 @@ subscriptions _ =
 
 
 view : Model -> Html msg
-view { boid, world, env } =
+view { boid, world } =
     let
         ( width, height ) =
             world
     in
         div
             [ style
-                [ ( "backgroundColor", "white" )
+                [ ( "backgroundColor", "black" )
+                , ( "color", "white" )
                 ]
             ]
             [ div [] [ Html.text (toString boid) ]
-            , div [] [ Html.text ("Size: " ++ (toString env.window)) ]
+            , div [] [ Html.text ("Size: " ++ (toString world)) ]
             , collage
-                (round width)
-                (round height)
+                width
+                height
                 ([ Boid.boid boid
                  ]
-                    |> addAxis (round width) (round height)
+                    |> addAxis width height
                 )
                 |> toHtml
             ]
