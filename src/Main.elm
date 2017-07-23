@@ -1,14 +1,14 @@
 module Main exposing (main)
 
-import Boid exposing (Boid, boid)
+import Boid exposing (Boid, boid, wrapBoidPosition)
 import Collage exposing (collage)
 import Element exposing (toHtml)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (style)
-import Task exposing (..)
+import List
+import Task 
 import Time exposing (Time, every)
-import Types exposing (Point)
-import Utils exposing (addAxis, wrapPosition)
+import Utils exposing (addAxis)
 import Window exposing (Size, size)
 
 
@@ -23,7 +23,7 @@ main =
 
 
 type alias Model =
-    { boid : { position : Point, angle : Float }
+    { boids : List Boid
     , world : ( Int, Int )
     }
 
@@ -35,41 +35,28 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { boid = Boid ( 50, 50 ) 180
+    ( { boids =
+            [ Boid ( 50, 50 ) 180
+            , Boid ( 0, 0 ) 90
+            ]
       , world = ( 0, 0 )
       }
     , Task.perform UpdateWorld size
     )
 
 
-wrapBoidPosition : Boid -> ( Int, Int ) -> Boid
-wrapBoidPosition boid ( width, height ) =
-    { boid
-        | position =
-            wrapPosition
-                boid.position
-                ( toFloat width, toFloat height )
-    }
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick _ ->
-            let
-                nextBoidWithoutRestrictions =
-                    Boid.update model.boid
-
-                nextBoid =
-                    wrapBoidPosition
-                        nextBoidWithoutRestrictions
-                        model.world
-            in
-                ( { model
-                    | boid = nextBoid
-                  }
-                , Cmd.none
-                )
+            ( { model
+                | boids =
+                    List.map
+                        (Boid.update model.world)
+                        model.boids
+              }
+            , Cmd.none
+            )
 
         UpdateWorld size ->
             ( { model
@@ -87,7 +74,7 @@ subscriptions _ =
 
 
 view : Model -> Html msg
-view { boid, world } =
+view { boids, world } =
     let
         ( width, height ) =
             world
@@ -103,8 +90,7 @@ view { boid, world } =
             , collage
                 width
                 height
-                ([ Boid.boid boid
-                 ]
+                (List.map Boid.boid boids
                     |> addAxis width height
                 )
                 |> toHtml

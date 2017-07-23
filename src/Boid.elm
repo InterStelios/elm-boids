@@ -1,9 +1,10 @@
-module Boid exposing (Boid, boid, update)
+module Boid exposing (Boid, boid, update, wrapBoidPosition)
 
 import Basics exposing (degrees)
 import Collage exposing (Form, filled, move, polygon, rotate)
 import Color exposing (white)
 import Types exposing (Point)
+import Utils exposing (wrapPosition)
 
 
 type alias Boid =
@@ -43,17 +44,30 @@ yDirection y angle step =
           )
 
 
-update : Boid -> Boid
-update { position, angle } =
+wrapBoidPosition : Boid -> ( Int, Int ) -> Boid
+wrapBoidPosition boid ( width, height ) =
+    { boid
+        | position =
+            wrapPosition
+                boid.position
+                ( toFloat width, toFloat height )
+    }
+
+
+update : ( Int, Int ) -> Boid -> Boid
+update boundaries { position, angle } =
     let
         ( x, y ) =
             position
 
         speed =
             1
+
+        nextBoid =
+            Boid
+                ( xDirection x angle speed + x
+                , yDirection y angle speed + y
+                )
+                angle
     in
-        Boid
-            ( xDirection x angle speed + x
-            , yDirection y angle speed + y
-            )
-            angle
+        nextBoid
