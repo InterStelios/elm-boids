@@ -2,11 +2,15 @@ module Main exposing (main)
 
 import Boid exposing (Boid, boid)
 import Collage exposing (collage)
+import Time.DateTime as DateTime exposing (DateTime, fromTimestamp, toISO8601)
 import Element exposing (toHtml)
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, span, text)
+import Html.Attributes exposing (style)
+import Task exposing (..)
 import Time exposing (Time, every)
 import Types exposing (Point)
 import Utils exposing (addAxis, wrapPosition)
+import Window exposing (Size, size)
 
 
 main : Program Never Model Msg
@@ -22,19 +26,24 @@ main =
 type alias Model =
     { boid : { position : Point, angle : Float }
     , world : Point
+    , env : { window : Size }
+    , time : DateTime
     }
 
 
 type Msg
     = Tick Time
+    | UpdateTime Time
 
 
 init : ( Model, Cmd Msg )
 init =
     ( { boid = Boid ( 50, 50 ) 180
       , world = ( 500, 500 )
+      , env = { window = Size 500 500 }
+      , time = DateTime.epoch
       }
-    , Cmd.none
+    , Task.perform UpdateTime Time.now
     )
 
 
@@ -64,20 +73,32 @@ update msg model =
                 , Cmd.none
                 )
 
+        UpdateTime time ->
+            ( { model
+                | time = fromTimestamp time
+            }, Task.perform UpdateTime Time.now )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    every 16 Tick
+    Sub.batch
+        [ every 16 Tick
+        ]
 
 
 view : Model -> Html msg
-view { boid, world } =
+view { boid, world, time } =
     let
         ( width, height ) =
             world
     in
-        div []
-            [ Html.text (toString boid)
+        div
+            [ style
+                [ ( "backgroundColor", "white" )
+                ]
+            ]
+            [ div [] [ Html.text (toString boid) ]
+            , div [] [ Html.text ("Time: " ++ (toISO8601 time)) ]
             , collage
                 (round width)
                 (round height)
