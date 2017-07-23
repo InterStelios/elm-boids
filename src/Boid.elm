@@ -44,8 +44,8 @@ yDirection y angle step =
           )
 
 
-wrapBoidPosition : Boid -> ( Int, Int ) -> Boid
-wrapBoidPosition boid ( width, height ) =
+wrapBoidPosition : ( Int, Int ) -> Boid -> Boid
+wrapBoidPosition ( width, height ) boid =
     { boid
         | position =
             wrapPosition
@@ -61,7 +61,7 @@ update boundaries { position, angle } =
             position
 
         speed =
-            1
+            10
 
         nextBoid =
             Boid
@@ -71,3 +71,4 @@ update boundaries { position, angle } =
                 angle
     in
         nextBoid
+            |> wrapBoidPosition boundaries
