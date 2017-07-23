@@ -6,7 +6,8 @@ import Element exposing (toHtml)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (style)
 import List
-import Task 
+import Seed exposing (generateBoids)
+import Task
 import Time exposing (Time, every)
 import Utils exposing (addAxis)
 import Window exposing (Size, size)
@@ -31,14 +32,12 @@ type alias Model =
 type Msg
     = Tick Time
     | UpdateWorld Size
+    | BoidsGenerated (List Boid)
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { boids =
-            [ Boid ( 50, 50 ) 180
-            , Boid ( 0, 0 ) 90
-            ]
+    ( { boids = []
       , world = ( 0, 0 )
       }
     , Task.perform UpdateWorld size
@@ -61,6 +60,13 @@ update msg model =
         UpdateWorld size ->
             ( { model
                 | world = ( size.width, size.height )
+              }
+            , generateBoids BoidsGenerated 100
+            )
+
+        BoidsGenerated generatedBoids ->
+            ( { model
+                | boids = generatedBoids
               }
             , Cmd.none
             )
@@ -85,9 +91,7 @@ view { boids, world } =
                 , ( "color", "white" )
                 ]
             ]
-            [ div [] [ Html.text (toString boid) ]
-            , div [] [ Html.text ("Size: " ++ (toString world)) ]
-            , collage
+            [ collage
                 width
                 height
                 (List.map Boid.boid boids

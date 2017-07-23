@@ -61,7 +61,7 @@ update boundaries { position, angle } =
             position
 
         speed =
-            10
+            5
 
         nextBoid =
             Boid
