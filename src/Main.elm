@@ -2,7 +2,6 @@ module Main exposing (main)
 
 import Boid exposing (Boid, boid)
 import Collage exposing (collage)
-import Time.DateTime as DateTime exposing (DateTime, fromTimestamp, toISO8601)
 import Element exposing (toHtml)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (style)
@@ -27,23 +26,21 @@ type alias Model =
     { boid : { position : Point, angle : Float }
     , world : Point
     , env : { window : Size }
-    , time : DateTime
     }
 
 
 type Msg
     = Tick Time
-    | UpdateTime Time
+    | UpdateSize Size
 
 
 init : ( Model, Cmd Msg )
 init =
     ( { boid = Boid ( 50, 50 ) 180
-      , world = ( 500, 500 )
-      , env = { window = Size 500 500 }
-      , time = DateTime.epoch
+      , world = (0, 0)
+      , env = { window = Size 0 0 }
       }
-    , Task.perform UpdateTime Time.now
+    , Task.perform UpdateSize size
     )
 
 
@@ -73,10 +70,19 @@ update msg model =
                 , Cmd.none
                 )
 
-        UpdateTime time ->
-            ( { model
-                | time = fromTimestamp time
-            }, Task.perform UpdateTime Time.now )
+        UpdateSize size ->
+            let
+                { env } =
+                    model
+
+                newEnv =
+                    { env | window = size }
+            in
+                ( { model
+                    | env = newEnv
+                  }
+                , Cmd.none
+                )
 
 
 subscriptions : Model -> Sub Msg
@@ -87,7 +93,7 @@ subscriptions _ =
 
 
 view : Model -> Html msg
-view { boid, world, time } =
+view { boid, world, env } =
     let
         ( width, height ) =
             world
@@ -98,7 +104,7 @@ view { boid, world, time } =
                 ]
             ]
             [ div [] [ Html.text (toString boid) ]
-            , div [] [ Html.text ("Time: " ++ (toISO8601 time)) ]
+            , div [] [ Html.text ("Size: " ++ (toString env.window)) ]
             , collage
                 (round width)
                 (round height)
