@@ -2,7 +2,7 @@ module Utils exposing (addAxis, wrapPosition)
 
 import Collage exposing (Form, dotted, path, traced)
 import Color exposing (white)
-import Types exposing (Point)
+import Math.Vector2 exposing (Vec2, getY, getX, setX, setY)
 
 
 addAxis : Int -> Int -> List Form -> List Form
@@ -28,22 +28,28 @@ yAxis height =
         |> traced (dotted white)
 
 
-wrapPosition : Point -> Point -> Point
+wrapPosition : Vec2 -> Vec2 -> Vec2
 wrapPosition position worldCoordinates =
     let
-        ( nextX, nextY ) =
-            position
+        nextX =
+            getX position
 
-        ( worldX, worldY ) =
-            worldCoordinates
+        nextY =
+            getY position
+
+        worldX =
+            getX worldCoordinates
+
+        worldY =
+            getY worldCoordinates
     in
         if (nextX * 2 > worldX) then
-            ( (worldX / -2), nextY )
+            setX (worldX / -2) position
         else if (nextX * 2 < -worldX) then
-            ( (worldX / 2), nextY )
+            setX (worldX / 2) position
         else if (nextY * 2 > worldY) then
-            ( nextX, (worldY / -2) )
+            setY (worldY / -2) position
         else if (nextY * 2 < -worldY) then
-            ( 0, worldY / 2 )
+            setY (worldY / 2) position
         else
             position

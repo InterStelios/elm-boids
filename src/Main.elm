@@ -58,15 +58,15 @@ update msg model =
             )
 
         UpdateWorld size ->
-        let
-            boundaries = (size.width, size.height)
-        in
-            
-            ( { model
-                | world = boundaries
-              }
-            , generateBoids BoidsGenerated 20 boundaries
-            )
+            let
+                boundaries =
+                    ( size.width, size.height )
+            in
+                ( { model
+                    | world = boundaries
+                  }
+                , generateBoids BoidsGenerated 1500 (0,0)
+                )
 
         BoidsGenerated generatedBoids ->
             ( { model
