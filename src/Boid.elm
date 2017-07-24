@@ -10,6 +10,7 @@ import Utils exposing (wrapPosition)
 type alias Boid =
     { position : Point
     , angle : Float
+    , speed : Int
     }
 
 
@@ -26,18 +27,18 @@ boid { position, angle } =
         |> move position
 
 
-xDirection : Float -> Float -> Float -> Float
+xDirection : Float -> Float -> Int -> Float
 xDirection x angle step =
-    step
+    (toFloat step)
         * (angle
             |> degrees
             |> cos
           )
 
 
-yDirection : Float -> Float -> Float -> Float
+yDirection : Float -> Float -> Int -> Float
 yDirection y angle step =
-    step
+    (toFloat step)
         * (angle
             |> degrees
             |> sin
@@ -55,13 +56,10 @@ wrapBoidPosition ( width, height ) boid =
 
 
 update : ( Int, Int ) -> Boid -> Boid
-update boundaries { position, angle } =
+update boundaries { position, angle, speed } =
     let
         ( x, y ) =
             position
-
-        speed =
-            5
 
         nextBoid =
             Boid
@@ -69,6 +67,7 @@ update boundaries { position, angle } =
                 , yDirection y angle speed + y
                 )
                 angle
+                speed
     in
         nextBoid
             |> wrapBoidPosition boundaries
