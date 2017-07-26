@@ -1,17 +1,18 @@
 module Seed exposing (generateBoids)
 
-import Debug exposing (log)
-import Boid exposing (Boid)
-import Random exposing (Generator, generate, list, int, float, map4)
-import Math.Vector2 exposing (Vec2, vec2, getX, getY, toTuple)
+import Boid
+import Color
+import Random
+import Random.Color
+import Math.Vector2 as V2
 
 
-randomBoid : Float -> Float -> Int -> Int -> Boid
-randomBoid x y angle speed =
-    Boid (vec2 x y) angle speed
+randomBoid : Float -> Float -> Int -> Int -> Color.Color -> Boid.Boid
+randomBoid x y angle speed colour =
+    Boid.Boid (V2.vec2 x y) angle speed colour
 
 
-boidGenerator : ( Int, Int ) -> Generator Boid
+boidGenerator : ( Int, Int ) -> Random.Generator Boid.Boid
 boidGenerator ( width, height ) =
     let
         x =
@@ -19,11 +20,38 @@ boidGenerator ( width, height ) =
 
         y =
             (toFloat height) / 2
+
+        randomXBounds =
+            Random.float -x x
+
+        randomYBounds =
+            Random.float -y y
+
+        randomDirection =
+            Random.int 0 360
+
+        randomSpeed =
+            Random.int 1 5
+        
+        randomColour = 
+            Random.Color.rgb
     in
-        log (toString ( x, y ))
-            (map4 randomBoid (float -x x) (float -y y) (int 0 360) (int 1 3))
+        Random.map5
+            randomBoid
+            randomXBounds
+            randomYBounds
+            randomDirection
+            randomSpeed
+            randomColour
 
 
-generateBoids : (List Boid -> msg) -> Int -> ( Int, Int ) -> Cmd msg
-generateBoids tagger numberOfBoids boundaries =
-    generate tagger (list numberOfBoids (boidGenerator boundaries))
+generateBoids : (List Boid.Boid -> msg) -> Int -> ( Int, Int ) -> Cmd msg
+generateBoids tagger numberOfBoids bounds =
+    let
+        boidGeneratorWithBounds =
+            boidGenerator bounds
+
+        randomListBoidGenerator =
+            Random.list numberOfBoids boidGeneratorWithBounds
+    in
+        Random.generate tagger randomListBoidGenerator

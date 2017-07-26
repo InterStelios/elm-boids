@@ -1,30 +1,31 @@
 module Boid exposing (Boid, boid, update, wrapBoidPosition)
 
-import Basics exposing (degrees)
-import Math.Vector2 exposing (Vec2, vec2, getX, getY, toTuple)
-import Collage exposing (Form, filled, move, polygon, rotate)
-import Color exposing (white)
-import Utils exposing (wrapPosition)
+import Basics
+import Math.Vector2 as V2
+import Collage 
+import Color 
+import Utils 
 
 
 type alias Boid =
-    { position : Vec2
+    { position : V2.Vec2
     , angle : Int
     , speed : Int
+    , colour: Color.Color
     }
 
 
-boid : Boid -> Form
-boid { position, angle } =
-    polygon
+boid : Boid -> Collage.Form
+boid { position, angle, colour } =
+    Collage.polygon
         [ ( 0, 0 )
         , ( 0 - 4, 0 + 5 )
         , ( 0 + 10, 0 )
         , ( 0 - 4, 0 - 5 )
         ]
-        |> filled white
-        |> rotate (degrees (toFloat angle))
-        |> move (toTuple position)
+        |> Collage.filled colour
+        |> Collage.rotate (Basics.degrees (toFloat angle))
+        |> Collage.move (V2.toTuple position)
 
 
 xDirection : Float -> Float -> Int -> Float
@@ -49,29 +50,30 @@ wrapBoidPosition : ( Int, Int ) -> Boid -> Boid
 wrapBoidPosition ( width, height ) boid =
     { boid
         | position =
-            wrapPosition
+            Utils.wrapPosition
                 boid.position
-                (vec2 (toFloat width) (toFloat height))
+                (V2.vec2 (toFloat width) (toFloat height))
     }
 
 
 update : ( Int, Int ) -> Boid -> Boid
-update boundaries { position, angle, speed } =
+update boundaries { position, angle, speed, colour } =
     let
         x =
-            getX position
+            V2.getX position
 
         y =
-            getY position
+            V2.getY position
 
         nextBoid =
             Boid
-                (vec2
+                (V2.vec2
                     (xDirection x (toFloat angle) speed + x)
                     (yDirection y (toFloat angle) speed + y)
                 )
                 angle
                 speed
+                colour
     in
         nextBoid
             |> wrapBoidPosition boundaries

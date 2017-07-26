@@ -1,16 +1,16 @@
 module Main exposing (main)
 
-import Boid exposing (Boid, boid, wrapBoidPosition)
-import Collage exposing (collage)
-import Element exposing (toHtml)
-import Html exposing (Html, div, span, text)
-import Html.Attributes exposing (style)
+import Boid
+import Collage
+import Element
+import Html
+import Html.Attributes
 import List
-import Seed exposing (generateBoids)
+import Seed
 import Task
-import Time exposing (Time, every)
-import Utils exposing (addAxis)
-import Window exposing (Size, size)
+import Time
+import Utils
+import Window
 
 
 main : Program Never Model Msg
@@ -24,15 +24,15 @@ main =
 
 
 type alias Model =
-    { boids : List Boid
+    { boids : List Boid.Boid
     , world : ( Int, Int )
     }
 
 
 type Msg
-    = Tick Time
-    | UpdateWorld Size
-    | BoidsGenerated (List Boid)
+    = Tick Time.Time
+    | UpdateWorld Window.Size
+    | BoidsGenerated (List Boid.Boid)
 
 
 init : ( Model, Cmd Msg )
@@ -40,66 +40,68 @@ init =
     ( { boids = []
       , world = ( 0, 0 )
       }
-    , Task.perform UpdateWorld size
+    , Task.perform UpdateWorld Window.size
     )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Tick _ ->
-            ( { model
-                | boids =
-                    List.map
-                        (Boid.update model.world)
-                        model.boids
-              }
-            , Cmd.none
-            )
+    let
+        updateBoid =
+            Boid.update model.world
 
-        UpdateWorld size ->
-            let
-                boundaries =
-                    ( size.width, size.height )
-            in
+        nextBoids =
+            List.map updateBoid model.boids
+    in
+        case msg of
+            Tick _ ->
                 ( { model
-                    | world = boundaries
+                    | boids = nextBoids
                   }
-                , generateBoids BoidsGenerated 1500 (0,0)
+                , Cmd.none
                 )
 
-        BoidsGenerated generatedBoids ->
-            ( { model
-                | boids = generatedBoids
-              }
-            , Cmd.none
-            )
+            UpdateWorld size ->
+                ( { model
+                    | world = ( size.width, size.height )
+                  }
+                , Seed.generateBoids BoidsGenerated 1500 ( 0, 0 )
+                )
+
+            BoidsGenerated generatedBoids ->
+                ( { model
+                    | boids = generatedBoids
+                  }
+                , Cmd.none
+                )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ every 16 Tick
+        [ Time.every 16 Tick
         ]
 
 
-view : Model -> Html msg
+view : Model -> Html.Html msg
 view { boids, world } =
     let
         ( width, height ) =
-            world
+           world
     in
-        div
-            [ style
+        Html.div
+            [ Html.Attributes.style
                 [ ( "backgroundColor", "black" )
+                , ("width", "100%")
+                , ("height", "100%")
                 , ( "color", "white" )
                 ]
             ]
-            [ collage
-                width
+            [ Collage.collage
+                width 
                 height
                 (List.map Boid.boid boids
-                    |> addAxis width height
+                    |> Utils.addAxis width height
                 )
-                |> toHtml
+                |> Element.toHtml
             ]

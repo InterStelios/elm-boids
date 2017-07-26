@@ -1,55 +1,55 @@
 module Utils exposing (addAxis, wrapPosition)
 
-import Collage exposing (Form, dotted, path, traced)
-import Color exposing (white)
-import Math.Vector2 exposing (Vec2, getY, getX, setX, setY)
+import Collage 
+import Color
+import Math.Vector2 as V2
 
 
-addAxis : Int -> Int -> List Form -> List Form
+addAxis : Int -> Int -> List Collage.Form -> List Collage.Form
 addAxis width height eles =
     eles ++ [ xAxis width, yAxis height ]
 
 
-xAxis : Int -> Form
+xAxis : Int -> Collage.Form
 xAxis width =
-    path
+    Collage.path
         [ ( toFloat -width / 2, 0 )
         , ( toFloat width / 2, 0 )
         ]
-        |> traced (dotted white)
+        |> Collage.traced (Collage.dotted Color.white)
 
 
-yAxis : Int -> Form
+yAxis : Int -> Collage.Form
 yAxis height =
-    path
+    Collage.path
         [ ( 0, toFloat -height / 2 )
         , ( 0, toFloat height / 2 )
         ]
-        |> traced (dotted white)
+        |> Collage.traced (Collage.dotted Color.white)
 
 
-wrapPosition : Vec2 -> Vec2 -> Vec2
+wrapPosition : V2.Vec2 -> V2.Vec2 -> V2.Vec2
 wrapPosition position worldCoordinates =
     let
         nextX =
-            getX position
+            V2.getX position
 
         nextY =
-            getY position
+            V2.getY position
 
         worldX =
-            getX worldCoordinates
+            V2.getX worldCoordinates
 
         worldY =
-            getY worldCoordinates
+            V2.getY worldCoordinates
     in
         if (nextX * 2 > worldX) then
-            setX (worldX / -2) position
+            V2.setX (worldX / -2) position
         else if (nextX * 2 < -worldX) then
-            setX (worldX / 2) position
+            V2.setX (worldX / 2) position
         else if (nextY * 2 > worldY) then
-            setY (worldY / -2) position
+            V2.setY (worldY / -2) position
         else if (nextY * 2 < -worldY) then
-            setY (worldY / 2) position
+            V2.setY (worldY / 2) position
         else
             position
