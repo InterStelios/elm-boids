@@ -1,18 +1,18 @@
 module Seed exposing (generateBoids)
 
-import Boid
-import Color
+import Boid exposing (Boid)
+import Color exposing (Color)
 import Random
 import Random.Color
 import Math.Vector2 as V2
 
 
-randomBoid : Float -> Float -> Int -> Int -> Color.Color -> Boid.Boid
+randomBoid : Float -> Float -> Int -> Int -> Color -> Boid
 randomBoid x y angle speed colour =
-    Boid.Boid (V2.vec2 x y) angle speed colour
+    Boid (V2.vec2 x y) angle speed colour
 
 
-boidGenerator : ( Int, Int ) -> Random.Generator Boid.Boid
+boidGenerator : ( Int, Int ) -> Random.Generator Boid
 boidGenerator ( width, height ) =
     let
         x =
@@ -45,7 +45,7 @@ boidGenerator ( width, height ) =
             randomColour
 
 
-generateBoids : (List Boid.Boid -> msg) -> Int -> ( Int, Int ) -> Cmd msg
+generateBoids : (List Boid -> msg) -> Int -> ( Int, Int ) -> Cmd msg
 generateBoids tagger numberOfBoids bounds =
     let
         boidGeneratorWithBounds =

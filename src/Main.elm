@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Boid
+import Boid exposing (Boid)
 import Collage
 import Element
 import Html
@@ -24,7 +24,7 @@ main =
 
 
 type alias Model =
-    { boids : List Boid.Boid
+    { boids : List Boid
     , world : ( Int, Int )
     }
 
@@ -32,7 +32,7 @@ type alias Model =
 type Msg
     = Tick Time.Time
     | UpdateWorld Window.Size
-    | BoidsGenerated (List Boid.Boid)
+    | BoidsGenerated (List Boid)
 
 
 init : ( Model, Cmd Msg )
