@@ -2,16 +2,16 @@ module Boid exposing (Boid, boid, update, wrapBoidPosition)
 
 import Basics
 import Math.Vector2 as V2
-import Collage 
+import Collage
 import Color exposing (Color)
-import Utils 
+import Utils
 
 
 type alias Boid =
     { position : V2.Vec2
     , angle : Int
     , speed : Int
-    , colour: Color
+    , colour : Color
     }
 
 

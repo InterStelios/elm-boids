@@ -1,7 +1,11 @@
 module Main exposing (main)
 
+import Debug
+import Array
 import Boid exposing (Boid)
 import Collage
+import Color exposing (Color)
+import Dict exposing (Dict)
 import Element
 import Html
 import Html.Attributes
@@ -25,6 +29,7 @@ main =
 
 type alias Model =
     { boids : List Boid
+    , coloursPerSpeed : Dict Int Color
     , world : ( Int, Int )
     }
 
@@ -33,12 +38,14 @@ type Msg
     = Tick Time.Time
     | UpdateWorld Window.Size
     | BoidsGenerated (List Boid)
+    | ColoursGenerated (List Color)
 
 
 init : ( Model, Cmd Msg )
 init =
     ( { boids = []
       , world = ( 0, 0 )
+      , coloursPerSpeed = Dict.empty
       }
     , Task.perform UpdateWorld Window.size
     )
@@ -47,30 +54,50 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        updateBoid =
-            Boid.update model.world
-
-        nextBoids =
-            List.map updateBoid model.boids
+        maxRandomSpeed = 1
     in
-        case msg of
-            Tick _ ->
-                ( { model
-                    | boids = nextBoids
-                  }
+    case msg of
+        Tick _ ->
+            let
+                nextBoids =
+                    List.map (Boid.update model.world) model.boids
+            in
+                ( { model | boids = nextBoids }
                 , Cmd.none
                 )
 
-            UpdateWorld size ->
-                ( { model
-                    | world = ( size.width, size.height )
-                  }
-                , Seed.generateBoids BoidsGenerated 1500 ( 0, 0 )
-                )
+        UpdateWorld size ->
+            let
+                randomPosition = (0,0)
+            in
+            ( { model | world = ( size.width, size.height ) }
+            , Seed.generateBoids BoidsGenerated 1500 randomPosition maxRandomSpeed
+            )
 
-            BoidsGenerated generatedBoids ->
+        BoidsGenerated generatedBoids ->
+            ( { model | boids = generatedBoids }
+            , Seed.generateRandomColours ColoursGenerated maxRandomSpeed
+            )
+
+        ColoursGenerated colours ->
+            let
+                setColour boid =
+                    { boid
+                        | colour = 
+                            List.indexedMap (,) colours
+                            |> List.filter (\(i, colour) -> i == boid.speed)
+                            |> List.head
+                            |> Maybe.withDefault (0, Color.white)
+                            |> \(i, colour) -> colour
+                    }
+
+                nextBoids =
+                    List.map
+                        (\boid -> setColour boid |> Boid.update model.world)
+                        model.boids
+            in
                 ( { model
-                    | boids = generatedBoids
+                    | boids = nextBoids
                   }
                 , Cmd.none
                 )
@@ -87,18 +114,16 @@ view : Model -> Html.Html msg
 view { boids, world } =
     let
         ( width, height ) =
-           world
+            world
     in
         Html.div
             [ Html.Attributes.style
                 [ ( "backgroundColor", "black" )
-                , ("width", "100%")
-                , ("height", "100%")
-                , ( "color", "white" )
+                , ( "color", "black" )
                 ]
             ]
             [ Collage.collage
-                width 
+                width
                 height
                 (List.map Boid.boid boids
                     |> Utils.addAxis width height

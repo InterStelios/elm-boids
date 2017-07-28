@@ -1,4 +1,4 @@
-module Seed exposing (generateBoids)
+module Seed exposing (generateBoids, generateRandomColours)
 
 import Boid exposing (Boid)
 import Color exposing (Color)
@@ -7,13 +7,13 @@ import Random.Color
 import Math.Vector2 as V2
 
 
-randomBoid : Float -> Float -> Int -> Int -> Color -> Boid
-randomBoid x y angle speed colour =
-    Boid (V2.vec2 x y) angle speed colour
+randomBoid : Float -> Float -> Int -> Int -> Boid
+randomBoid x y angle speed =
+    Boid (V2.vec2 x y) angle speed Color.white
 
 
-boidGenerator : ( Int, Int ) -> Random.Generator Boid
-boidGenerator ( width, height ) =
+boidGenerator : ( Int, Int ) -> Int -> Random.Generator Boid
+boidGenerator ( width, height ) maxSpeed =
     let
         x =
             (toFloat width) / 2
@@ -31,27 +31,32 @@ boidGenerator ( width, height ) =
             Random.int 0 360
 
         randomSpeed =
-            Random.int 1 5
+            Random.int 1 maxSpeed
         
-        randomColour = 
-            Random.Color.rgb
     in
-        Random.map5
+        Random.map4
             randomBoid
             randomXBounds
             randomYBounds
             randomDirection
             randomSpeed
-            randomColour
 
 
-generateBoids : (List Boid -> msg) -> Int -> ( Int, Int ) -> Cmd msg
-generateBoids tagger numberOfBoids bounds =
+generateBoids : (List Boid -> msg) -> Int -> ( Int, Int ) -> Int -> Cmd msg
+generateBoids tagger numberOfBoids bounds speed =
     let
         boidGeneratorWithBounds =
-            boidGenerator bounds
+            boidGenerator bounds speed
 
         randomListBoidGenerator =
             Random.list numberOfBoids boidGeneratorWithBounds
     in
         Random.generate tagger randomListBoidGenerator
+
+
+generateRandomColours : (List Color -> msg) -> Int -> Cmd msg
+generateRandomColours tagger numberOfBoids =
+            Random.generate 
+                tagger 
+                (Random.list numberOfBoids Random.Color.rgb)
+
