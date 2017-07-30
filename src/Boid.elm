@@ -28,19 +28,21 @@ boid { position, angle, colour } =
         |> Collage.move (V2.toTuple position)
 
 
-xDirection : Float -> Float -> Int -> Float
-xDirection x angle step =
+xDirection : Int -> Int -> Float
+xDirection angle step =
     (toFloat step)
         * (angle
+            |> toFloat
             |> degrees
             |> cos
           )
 
 
-yDirection : Float -> Float -> Int -> Float
-yDirection y angle step =
+yDirection : Int -> Int -> Float
+yDirection angle step =
     (toFloat step)
         * (angle
+            |> toFloat
             |> degrees
             |> sin
           )
@@ -68,8 +70,8 @@ update boundaries { position, angle, speed, colour } =
         nextBoid =
             Boid
                 (V2.vec2
-                    (xDirection x (toFloat angle) speed + x)
-                    (yDirection y (toFloat angle) speed + y)
+                    (xDirection angle speed + x)
+                    (yDirection angle speed + y)
                 )
                 angle
                 speed
