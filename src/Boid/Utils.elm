@@ -1,27 +1,17 @@
-module Boid.Utils exposing (xDirection, yDirection, wrapBoidPosition)
+module Boid.Utils exposing (direction, wrapBoidPosition)
 
 import Boid.Model exposing (Boid)
 import Math.Vector2 as V2
 import Utils
 
 
-xDirection : Int -> Int -> Float
-xDirection angle step =
+direction : Int -> Int -> (Float -> Float) -> Float
+direction angle step trigonometricFn =
     (toFloat step)
         * (angle
             |> toFloat
             |> degrees
-            |> cos
-          )
-
-
-yDirection : Int -> Int -> Float
-yDirection angle step =
-    (toFloat step)
-        * (angle
-            |> toFloat
-            |> degrees
-            |> sin
+            |> trigonometricFn
           )
 
 

@@ -31,8 +31,8 @@ update boundaries { position, angle, speed, colour } =
         nextBoid =
             Boid
                 (V2.vec2
-                    (Boid.Utils.xDirection angle speed + x)
-                    (Boid.Utils.yDirection angle speed + y)
+                    (Boid.Utils.direction angle speed cos + x)
+                    (Boid.Utils.direction angle speed sin + y)
                 )
                 angle
                 speed
