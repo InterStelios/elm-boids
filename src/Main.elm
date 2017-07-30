@@ -1,7 +1,5 @@
 module Main exposing (main)
 
-import Debug
-import Array
 import Boid.Model exposing (Boid)
 import Boid.Core
 import Collage
@@ -11,11 +9,12 @@ import Element
 import Html
 import Html.Attributes
 import List
-import Seed
+import Boid.Seed
 import Task
 import Time
 import Utils
 import Window
+import Debug
 
 
 main : Program Never Model Msg
@@ -35,11 +34,15 @@ type alias Model =
     }
 
 
+type GeneratorOutcome
+    = BoidsGenerated (List Boid)
+    | ColoursGenerated (List Color)
+
+
 type Msg
     = Tick Time.Time
     | UpdateWorld Window.Size
-    | BoidsGenerated (List Boid)
-    | ColoursGenerated (List Color)
+    | GeneratorMsg GeneratorOutcome
 
 
 init : ( Model, Cmd Msg )
@@ -74,36 +77,34 @@ update msg model =
                         ( 0, 0 )
                 in
                     ( { model | world = ( size.width, size.height ) }
-                    , Seed.generateBoids BoidsGenerated 1500 randomPosition maxRandomSpeed
+                    , Boid.Seed.generateBoids (GeneratorMsg << BoidsGenerated) 1500 randomPosition maxRandomSpeed
                     )
 
-            BoidsGenerated generatedBoids ->
-                ( { model | boids = generatedBoids }
-                , Seed.generateRandomColours ColoursGenerated maxRandomSpeed
-                )
+            GeneratorMsg generatorOutcome ->
+                case generatorOutcome of
+                    BoidsGenerated generatedBoids ->
+                        ( { model | boids = generatedBoids }
+                        , Boid.Seed.generateRandomColours (GeneratorMsg << ColoursGenerated) maxRandomSpeed
+                        )
 
-            ColoursGenerated colours ->
-                let
-                    setColour boid =
-                        { boid
-                            | colour =
-                                List.indexedMap (,) colours
-                                    |> List.filter (\( i, colour ) -> i == boid.speed)
-                                    |> List.head
-                                    |> Maybe.withDefault ( 0, Color.white )
-                                    |> \( i, colour ) -> colour
-                        }
+                    ColoursGenerated colours ->
+                        let
+                            setColour boid =
+                                { boid
+                                    | colour =
+                                        List.indexedMap (,) colours
+                                            |> List.filter (\( i, colour ) -> i == boid.speed)
+                                            |> List.head
+                                            |> Maybe.withDefault ( 0, Color.white )
+                                            |> \( i, colour ) -> colour
+                                }
 
-                    nextBoids =
-                        List.map
-                            (\boid -> setColour boid |> Boid.Core.update model.world)
-                            model.boids
-                in
-                    ( { model
-                        | boids = nextBoids
-                      }
-                    , Cmd.none
-                    )
+                            nextBoids =
+                                List.map
+                                    (\boid -> setColour boid |> Boid.Core.update model.world)
+                                    model.boids
+                        in
+                            ( { model | boids = nextBoids }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg

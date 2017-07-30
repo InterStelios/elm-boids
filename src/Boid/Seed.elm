@@ -1,4 +1,4 @@
-module Seed exposing (generateBoids, generateRandomColours)
+module Boid.Seed exposing (generateBoids, generateRandomColours)
 
 import Boid.Model exposing (Boid)
 import Color exposing (Color)
