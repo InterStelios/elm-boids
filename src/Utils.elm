@@ -1,6 +1,6 @@
 module Utils exposing (addAxis, wrapPosition)
 
-import Collage 
+import Collage
 import Color
 import Math.Vector2 as V2
 

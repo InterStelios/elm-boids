@@ -2,7 +2,8 @@ module Main exposing (main)
 
 import Debug
 import Array
-import Boid exposing (Boid)
+import Boid.Model exposing (Boid)
+import Boid.Core
 import Collage
 import Color exposing (Color)
 import Dict exposing (Dict)
@@ -54,53 +55,55 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        maxRandomSpeed = 1
+        maxRandomSpeed =
+            1
     in
-    case msg of
-        Tick _ ->
-            let
-                nextBoids =
-                    List.map (Boid.update model.world) model.boids
-            in
-                ( { model | boids = nextBoids }
-                , Cmd.none
+        case msg of
+            Tick _ ->
+                let
+                    nextBoids =
+                        List.map (Boid.Core.update model.world) model.boids
+                in
+                    ( { model | boids = nextBoids }
+                    , Cmd.none
+                    )
+
+            UpdateWorld size ->
+                let
+                    randomPosition =
+                        ( 0, 0 )
+                in
+                    ( { model | world = ( size.width, size.height ) }
+                    , Seed.generateBoids BoidsGenerated 1500 randomPosition maxRandomSpeed
+                    )
+
+            BoidsGenerated generatedBoids ->
+                ( { model | boids = generatedBoids }
+                , Seed.generateRandomColours ColoursGenerated maxRandomSpeed
                 )
 
-        UpdateWorld size ->
-            let
-                randomPosition = (0,0)
-            in
-            ( { model | world = ( size.width, size.height ) }
-            , Seed.generateBoids BoidsGenerated 1500 randomPosition maxRandomSpeed
-            )
+            ColoursGenerated colours ->
+                let
+                    setColour boid =
+                        { boid
+                            | colour =
+                                List.indexedMap (,) colours
+                                    |> List.filter (\( i, colour ) -> i == boid.speed)
+                                    |> List.head
+                                    |> Maybe.withDefault ( 0, Color.white )
+                                    |> \( i, colour ) -> colour
+                        }
 
-        BoidsGenerated generatedBoids ->
-            ( { model | boids = generatedBoids }
-            , Seed.generateRandomColours ColoursGenerated maxRandomSpeed
-            )
-
-        ColoursGenerated colours ->
-            let
-                setColour boid =
-                    { boid
-                        | colour = 
-                            List.indexedMap (,) colours
-                            |> List.filter (\(i, colour) -> i == boid.speed)
-                            |> List.head
-                            |> Maybe.withDefault (0, Color.white)
-                            |> \(i, colour) -> colour
-                    }
-
-                nextBoids =
-                    List.map
-                        (\boid -> setColour boid |> Boid.update model.world)
-                        model.boids
-            in
-                ( { model
-                    | boids = nextBoids
-                  }
-                , Cmd.none
-                )
+                    nextBoids =
+                        List.map
+                            (\boid -> setColour boid |> Boid.Core.update model.world)
+                            model.boids
+                in
+                    ( { model
+                        | boids = nextBoids
+                      }
+                    , Cmd.none
+                    )
 
 
 subscriptions : Model -> Sub Msg
@@ -125,7 +128,7 @@ view { boids, world } =
             [ Collage.collage
                 width
                 height
-                (List.map Boid.boid boids
+                (List.map Boid.Core.create boids
                     |> Utils.addAxis width height
                 )
                 |> Element.toHtml
