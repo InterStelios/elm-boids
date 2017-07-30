@@ -32,7 +32,10 @@ type alias Model =
     , coloursPerSpeed : Dict Int Color
     , world : ( Int, Int )
     , config :
-        { maxRandomSpeed : Int
+        { speed : ( Int, Int )
+        , orientation : ( Int, Int )
+        , bounds : ( Int, Int )
+        , boids : Int
         }
     }
 
@@ -54,7 +57,10 @@ init =
       , world = ( 0, 0 )
       , coloursPerSpeed = Dict.empty
       , config =
-            { maxRandomSpeed = 5
+            { speed = ( 1, 10 )
+            , boids = 1500
+            , orientation = ( 90, 180 )
+            , bounds = (0,0)
             }
       }
     , Task.perform UpdateWorld Window.size
@@ -63,24 +69,30 @@ init =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Tick _ ->
-            ( Updators.Main.updateBoids model, Cmd.none )
+    let
+        { speed, boids, orientation, bounds } =
+            model.config
+    in
+        case msg of
+            Tick _ ->
+                ( Updators.Main.updateBoids model, Cmd.none )
 
-        UpdateWorld { width, height } ->
-            ( { model | world = ( width, height ) }
-            , Boid.Seed.generateBoids (GeneratorMsg << BoidsGenerated) 1500 ( 0, 0 ) model.config.maxRandomSpeed
-            )
+            UpdateWorld { width, height } ->
+                ( { model | world = ( width, height ) }
+                , Boid.Seed.generateBoids (GeneratorMsg << BoidsGenerated) boids bounds orientation speed
+                )
 
-        GeneratorMsg generatorOutcome ->
-            case generatorOutcome of
-                BoidsGenerated generatedBoids ->
-                    ( { model | boids = generatedBoids }
-                    , Boid.Seed.generateRandomColours (GeneratorMsg << ColoursGenerated) model.config.maxRandomSpeed
-                    )
+            GeneratorMsg generatorOutcome ->
+                case generatorOutcome of
+                    BoidsGenerated generatedBoids ->
+                        ( { model | boids = generatedBoids }
+                        , Boid.Seed.generateRandomColours
+                            (GeneratorMsg << ColoursGenerated)
+                            (Tuple.second model.config.speed)
+                        )
 
-                ColoursGenerated colours ->
-                    ( Updators.Main.updateBoidsWithUniqColourBySpeed model colours, Cmd.none )
+                    ColoursGenerated colours ->
+                        ( Updators.Main.updateBoidsWithUniqColourBySpeed model colours, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
