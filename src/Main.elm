@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Updators.Main
 import Boid.Model exposing (Boid)
 import Boid.Core
 import Collage
@@ -14,7 +15,6 @@ import Task
 import Time
 import Utils
 import Window
-import Debug
 
 
 main : Program Never Model Msg
@@ -31,6 +31,9 @@ type alias Model =
     { boids : List Boid
     , coloursPerSpeed : Dict Int Color
     , world : ( Int, Int )
+    , config :
+        { maxRandomSpeed : Int
+        }
     }
 
 
@@ -50,6 +53,9 @@ init =
     ( { boids = []
       , world = ( 0, 0 )
       , coloursPerSpeed = Dict.empty
+      , config =
+            { maxRandomSpeed = 5
+            }
       }
     , Task.perform UpdateWorld Window.size
     )
@@ -57,54 +63,24 @@ init =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        maxRandomSpeed =
-            1
-    in
-        case msg of
-            Tick _ ->
-                let
-                    nextBoids =
-                        List.map (Boid.Core.update model.world) model.boids
-                in
-                    ( { model | boids = nextBoids }
-                    , Cmd.none
+    case msg of
+        Tick _ ->
+            ( Updators.Main.updateBoids model, Cmd.none )
+
+        UpdateWorld { width, height } ->
+            ( { model | world = ( width, height ) }
+            , Boid.Seed.generateBoids (GeneratorMsg << BoidsGenerated) 1500 ( 0, 0 ) model.config.maxRandomSpeed
+            )
+
+        GeneratorMsg generatorOutcome ->
+            case generatorOutcome of
+                BoidsGenerated generatedBoids ->
+                    ( { model | boids = generatedBoids }
+                    , Boid.Seed.generateRandomColours (GeneratorMsg << ColoursGenerated) model.config.maxRandomSpeed
                     )
 
-            UpdateWorld size ->
-                let
-                    randomPosition =
-                        ( 0, 0 )
-                in
-                    ( { model | world = ( size.width, size.height ) }
-                    , Boid.Seed.generateBoids (GeneratorMsg << BoidsGenerated) 1500 randomPosition maxRandomSpeed
-                    )
-
-            GeneratorMsg generatorOutcome ->
-                case generatorOutcome of
-                    BoidsGenerated generatedBoids ->
-                        ( { model | boids = generatedBoids }
-                        , Boid.Seed.generateRandomColours (GeneratorMsg << ColoursGenerated) maxRandomSpeed
-                        )
-
-                    ColoursGenerated colours ->
-                        let
-                            setColour boid =
-                                { boid
-                                    | colour =
-                                        List.indexedMap (,) colours
-                                            |> List.filter (\( i, colour ) -> i == boid.speed)
-                                            |> List.head
-                                            |> Maybe.withDefault ( 0, Color.white )
-                                            |> \( i, colour ) -> colour
-                                }
-
-                            nextBoids =
-                                List.map
-                                    (\boid -> setColour boid |> Boid.Core.update model.world)
-                                    model.boids
-                        in
-                            ( { model | boids = nextBoids }, Cmd.none )
+                ColoursGenerated colours ->
+                    ( Updators.Main.updateBoidsWithUniqColourBySpeed model colours, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
