@@ -1,70 +1,17 @@
-module Main exposing (main)
+module Main exposing (..)
 
+import Environment.Messages exposing (GeneratorOutcome(..), Msg(..))
+import Environment.Model exposing (Model, initModel)
 import Updators.Main
-import Boid.Model exposing (Boid)
-import Boid.Core
+import Boid.View
 import Collage
-import Color exposing (Color)
-import Dict exposing (Dict)
 import Element
 import Html
 import Html.Attributes
 import List
 import Boid.Seed
-import Task
 import Time
 import Utils
-import Window
-
-
-main : Program Never Model Msg
-main =
-    Html.program
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
-
-
-type alias Model =
-    { boids : List Boid
-    , coloursPerSpeed : Dict Int Color
-    , world : ( Int, Int )
-    , config :
-        { speed : ( Int, Int )
-        , orientation : ( Int, Int )
-        , bounds : ( Int, Int )
-        , boids : Int
-        }
-    }
-
-
-type GeneratorOutcome
-    = BoidsGenerated (List Boid)
-    | ColoursGenerated (List Color)
-
-
-type Msg
-    = Tick Time.Time
-    | UpdateWorld Window.Size
-    | GeneratorMsg GeneratorOutcome
-
-
-init : ( Model, Cmd Msg )
-init =
-    ( { boids = []
-      , world = ( 0, 0 )
-      , coloursPerSpeed = Dict.empty
-      , config =
-            { speed = ( 1, 10 )
-            , boids = 1500
-            , orientation = ( 90, 180 )
-            , bounds = (0,0)
-            }
-      }
-    , Task.perform UpdateWorld Window.size
-    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -126,8 +73,18 @@ view { boids, world } =
             [ Collage.collage
                 width
                 height
-                (List.map Boid.Core.create boids
+                (List.map Boid.View.create boids
                     |> Utils.addAxis width height
                 )
                 |> Element.toHtml
             ]
+
+
+main : Program Never Model Msg
+main =
+    Html.program
+        { init = initModel
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }

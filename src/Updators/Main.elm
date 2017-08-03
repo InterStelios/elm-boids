@@ -1,6 +1,6 @@
 module Updators.Main exposing (updateBoidsWithUniqColourBySpeed, updateBoids)
 
-import Boid.Core
+import Boid.Model
 import Color
 
 
@@ -18,7 +18,7 @@ updateBoidsWithUniqColourBySpeed model colours =
 
         nextBoids =
             List.map
-                (\boid -> setColour boid |> Boid.Core.update model.world)
+                (\boid -> setColour boid |> Boid.Model.update model.world)
                 model.boids
     in
         { model | boids = nextBoids }
@@ -27,6 +27,6 @@ updateBoidsWithUniqColourBySpeed model colours =
 updateBoids model =
     let
         nextBoids =
-            List.map (Boid.Core.update model.world) model.boids
+            List.map (Boid.Model.update model.world) model.boids
     in
         { model | boids = nextBoids }
