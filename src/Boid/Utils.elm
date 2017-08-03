@@ -18,8 +18,8 @@ direction angle step trigonometricFn =
 wrapBoidPosition : ( Int, Int ) -> Boid -> Boid
 wrapBoidPosition ( width, height ) boid =
     { boid
-        | position =
+        | location =
             Utils.wrapPosition
-                boid.position
+                boid.location
                 (V2.vec2 (toFloat width) (toFloat height))
     }

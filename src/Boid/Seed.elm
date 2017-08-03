@@ -12,8 +12,8 @@ randomBoid x y angle speed =
     Boid (V2.vec2 x y) angle speed Color.white
 
 
-boidGenerator : ( Int, Int ) -> (Int, Int) -> (Int, Int) -> Random.Generator Boid
-boidGenerator ( width, height ) (minSpeed, maxSpeed) (minAngle, maxAngle) =
+boidGenerator : ( Int, Int ) -> ( Int, Int ) -> ( Int, Int ) -> Random.Generator Boid
+boidGenerator ( width, height ) ( minSpeed, maxSpeed ) ( minAngle, maxAngle ) =
     let
         x =
             (toFloat width) / 2
@@ -32,7 +32,6 @@ boidGenerator ( width, height ) (minSpeed, maxSpeed) (minAngle, maxAngle) =
 
         randomSpeed =
             Random.int minSpeed maxSpeed
-        
     in
         Random.map4
             randomBoid
@@ -42,7 +41,7 @@ boidGenerator ( width, height ) (minSpeed, maxSpeed) (minAngle, maxAngle) =
             randomSpeed
 
 
-generateBoids : (List Boid -> msg) -> Int -> ( Int, Int ) -> (Int, Int) -> (Int, Int) -> Cmd msg
+generateBoids : (List Boid -> msg) -> Int -> ( Int, Int ) -> ( Int, Int ) -> ( Int, Int ) -> Cmd msg
 generateBoids tagger numberOfBoids bounds orientation speed =
     let
         boidGeneratorWithBounds =
@@ -56,7 +55,6 @@ generateBoids tagger numberOfBoids bounds orientation speed =
 
 generateRandomColours : (List Color -> msg) -> Int -> Cmd msg
 generateRandomColours tagger numberOfBoids =
-            Random.generate 
-                tagger 
-                (Random.list numberOfBoids Random.Color.rgb)
-
+    Random.generate
+        tagger
+        (Random.list numberOfBoids Random.Color.rgb)

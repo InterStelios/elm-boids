@@ -79,7 +79,12 @@ update msg model =
 
             UpdateWorld { width, height } ->
                 ( { model | world = ( width, height ) }
-                , Boid.Seed.generateBoids (GeneratorMsg << BoidsGenerated) boids bounds orientation speed
+                , Boid.Seed.generateBoids
+                    (GeneratorMsg << BoidsGenerated)
+                    boids
+                    bounds
+                    orientation
+                    speed
                 )
 
             GeneratorMsg generatorOutcome ->
@@ -92,7 +97,11 @@ update msg model =
                         )
 
                     ColoursGenerated colours ->
-                        ( Updators.Main.updateBoidsWithUniqColourBySpeed model colours, Cmd.none )
+                        ( Updators.Main.updateBoidsWithUniqColourBySpeed
+                            model
+                            colours
+                        , Cmd.none
+                        )
 
 
 subscriptions : Model -> Sub Msg
